@@ -12,3 +12,8 @@ repository = "https://github.com/piot/network-metrics"
 metricator = "0.0.6"
 monotonic-time-rs = "0.0.5"
 log = "0.4.22"
+
+
+[features]
+default = []
+log = []

@@ -3,9 +3,12 @@
  * Licensed under the MIT License. See LICENSE in the project root for license information.
  */
 
-use log::debug;
 use metricator::RateMetric;
-use monotonic_time_rs::{Millis, MillisDuration};
+use monotonic_time_rs::Millis;
+
+#[cfg(feature = "log")]
+use monotonic_time_rs::MillisDuration;
+
 use std::fmt::Display;
 
 pub struct MetricsInDirection {
@@ -43,8 +46,9 @@ pub struct NetworkMetrics {
     in_octets_per_second: RateMetric,
     out_datagrams_per_second: RateMetric,
     out_octets_per_second: RateMetric,
-
+    #[cfg(feature = "log")]
     last_debug_metric_at: Millis,
+    #[cfg(feature = "log")]
     debug_metric_duration: MillisDuration,
 }
 
@@ -56,7 +60,9 @@ impl NetworkMetrics {
 
             out_datagrams_per_second: RateMetric::with_interval(now, 0.1),
             out_octets_per_second: RateMetric::with_interval(now, 0.1),
+            #[cfg(feature = "log")]
             last_debug_metric_at: now,
+            #[cfg(feature = "log")]
             debug_metric_duration: MillisDuration::from_millis(500),
         }
     }
@@ -79,9 +85,13 @@ impl NetworkMetrics {
         self.out_datagrams_per_second.update(now);
         self.out_octets_per_second.update(now);
 
-        if now - self.last_debug_metric_at > self.debug_metric_duration {
-            self.last_debug_metric_at = now;
-            debug!("metrics: {}", self.metrics())
+        #[cfg(feature = "log")]
+        {
+            use log::debug;
+            if now - self.last_debug_metric_at > self.debug_metric_duration {
+                self.last_debug_metric_at = now;
+                debug!("metrics: {}", self.metrics())
+            }
         }
     }
 
